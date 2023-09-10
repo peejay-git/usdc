@@ -4,14 +4,6 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-    background: linear-gradient(45deg, #FF1CF7, #030D32, #00F0FF);
-}
-.text-white-6xl {
-  font-size: 4rem; /* You can adjust the font size as needed */
-  font-weight: bold;
-  font-family: monospace;
-  color: white; /* Change the text color to white */
-  margin-bottom: 1.5rem; /* You can adjust the margin as needed */
 }
 
 .happy-marquee-container {
@@ -42,26 +34,8 @@ body {
 
 .happy-text {
   font-size: 24px;
-  color: #FF69B4;
+  color: blue;
   animation: rainbow 5s linear infinite;
-}
-
-@keyframes rainbow {
-  0% {
-    color: #FF69B4;
-  }
-  25% {
-    color: #FFD700;
-  }
-  50% {
-    color: #7FFF00;
-  }
-  75% {
-    color: #40E0D0;
-  }
-  100% {
-    color: #FF69B4;
-  }
 }
 
 a {
