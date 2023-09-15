@@ -13,7 +13,7 @@ import usdcAbi from "../utils/usdcContract.json";
 export default function Home() {
   const usdcContractAddress = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F";
 
-  const contractAddress = "0x1A4816A6559f63E253407938C61271EdE76C9687S";
+  const contractAddress = "0x1a4816a6559f63e253407938c61271ede76c9687";
 
   /**
    * Create a variable here that references the abi content!
@@ -31,102 +31,106 @@ export default function Home() {
    */
   const checkIfWalletIsConnected = async () => {
     try {
-      const { ethereum } = window;
+        if (typeof window.ethereum !== "undefined") {
+            const accounts = await window.ethereum.request({ method: "eth_accounts" });
 
-      /*
-       * Check if we're authorized to access the user's wallet
-       */
-      const accounts = await ethereum.request({ method: "eth_accounts" });
-
-      // Validate that we have an account
-      if (accounts.length !== 0) {
-        const account = accounts[0];
-
-        // Set the current account
-        setCurrentAccount(account);
-
-        // Display a success message to the user that they are connected
-        success("🦄 Wallet is Connected!");
-      } else {
-        warn("Make sure you have MetaMask Connected!");
-      }
+            if (accounts.length > 0) {
+                const account = accounts[0];
+                setCurrentAccount(account);
+                success("🦄 Wallet is Connected!");
+            } else {
+                warn("Make sure you have an active Ethereum account.");
+            }
+        } else {
+            warn("Please install a wallet extension like MetaMask.");
+        }
     } catch (error) {
-      err(`${error.message}`);
+        err(`Error: ${error.message}`);
     }
-  };
+};
 
-  /**
-   * Implement your connectWallet method here
-   */
-  const connectWallet = async () => {
-    try {
+
+/**
+ * Connect the user's wallet
+ */
+const connectWallet = async () => {
+  try {
       const { ethereum } = window;
 
       // Check if MetaMask is installed
       if (!ethereum) {
-        warn("Make sure you have MetaMask Connected!");
-        return;
+          warn("MetaMask is not installed. Please install MetaMask.");
+          return;
       }
 
-      // Request account access if needed
-      const accounts = await ethereum.request({
-        method: "eth_requestAccounts",
-      });
+      // Request account access
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+
+      if (accounts.length === 0) {
+          warn("No Ethereum accounts found. Please create or unlock an Ethereum account in MetaMask.");
+          return;
+      }
 
       // Get the first account we get back
-      setCurrentAccount(accounts[0]);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+      const account = accounts[0];
+
+      // Set the current account
+      setCurrentAccount(account);
+
+      // Display a success message to the user that they are connected
+      success("🦄 Wallet is Connected!");
+  } catch (error) {
+      console.error(error);
+      err(`Error connecting to the wallet: ${error.message}`);
+  }
+};
+
 
   // Check if the user has approved the contract to spend their USDC
-  const Fund = async () => {
+  const fund = async (contractAddress, contractABI, amount) => {
     try {
-      const { ethereum } = window;
+        const { ethereum } = window;
 
-      // Check is user already connected a wallet
-      if (ethereum) {
+        if (!ethereum) {
+            warn("MetaMask is not installed. Please install MetaMask and connect your wallet.");
+            return;
+        }
+
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
 
         // Create a contract instance
-        const fundContract = new ethers.Contract(
-          contractAddress,
-          contractABI,
-          signer
-        );
+        const fundContract = new ethers.Contract(contractAddress, contractABI, signer);
 
         console.log("Connected to contract");
-        console.log("amount: ", amount);
+        console.log("Amount:", amount);
 
         // Send the transaction
-        const Txn = await fundContract.Fund(amount, {
-          gasLimit: 300000,
+        const transaction = await fundContract.Fund(amount, {
+            gasLimit: 300000,
         });
 
-        console.log("Mining...", Txn.hash);
+        console.log("Transaction hash:", transaction.hash);
 
         // Set the sending state to true
         setSending(true);
 
         // Wait for the transaction to be mined
-        await Txn.wait();
+        await transaction.wait();
 
         // Set the sending state to false
         setSending(false);
 
-        console.log("Mined -- ", Txn.hash);
+        console.log("Transaction mined:", transaction.hash);
 
         // Display a success message to the user
-        success("🦄 payment Successful!");
-      } else {
-        console.log("Ethereum object doesn't exist!");
-      }
+        success("🦄 Donation Sent Successfully!");
     } catch (error) {
-      err(`${error.message}`);
+        console.error(error);
+        err(`Error sending donation: ${error.message}`);
     }
-  };
+};
+
 
   // Check if the user has approved the contract to spend their USDC
   const Approve = async () => {
@@ -222,7 +226,7 @@ export default function Home() {
                   </>
                 ) : (
                   <button
-                    className="bg-blue-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className="bg-white-900 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                     type="button"
                     onClick={Approve}
                   >
